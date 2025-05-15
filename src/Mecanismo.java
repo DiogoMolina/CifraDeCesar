@@ -4,16 +4,16 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Mecanismo {
 
     private BufferedReader reader;
     private ArrayList<String> bufferPrimario;
+    CifraCesar cifra = new CifraCesar(3); // AQUI QUE ESCOLHE QUANTAS LETRAS PULAR, A CHAVE DA CIFRA
 
     public void CarregarArquivo(String caminhoCompleto){
-        this.CarregarArquivo(caminhoCompleto);
+        CarregarBufferPrimario(caminhoCompleto);
+        ProcessarBufferPrimario();
     }
 
     private void CarregarBufferPrimario(String caminhoCompleto){
@@ -45,22 +45,75 @@ public class Mecanismo {
         }
     }
 
-    public void executarCripto(String arquivoTexto, String arquivoCripto){
+    public void imprimirArquivo(String caminhoArquivo) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(caminhoArquivo))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                System.out.println(linha);
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao ler o arquivo: " + caminhoArquivo);
+        }
+    }
 
-        this.bufferPrimario = new ArrayList<>();
-        CarregarBufferPrimario(arquivoTexto);
-        ProcessarBufferPrimario();
-        CifraCesar criptografar = new CifraCesar(0);
+    public void executarCripto(String arquivoTexto, String arquivoCripto) { //ATIVIDADE DE CRIPTOGRAFAR
+        CarregarArquivo(arquivoTexto); // armazena no buffer primario
 
-        for (String texto : this.bufferPrimario) {
-            
+        ArrayList<String> bufferCripto = new ArrayList<>();
+    
+        for (String linha : bufferPrimario) {
+            StringBuilder novaLinha = new StringBuilder();
+    
+            novaLinha.append(cifra.criptografar(linha)); //parte em que criptografa cada linha
+    
+            bufferCripto.add(novaLinha.toString());
+        }
+    
+        //escreve no arquivo texto saidacripto.txt
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(arquivoCripto))) {
+            for (String linha : bufferCripto) {
+                writer.write(linha);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao escrever no arquivo: " + e.getMessage());
+        }
+    
+        System.out.println("=====ENTRADA DE TEXTO=====");
+        imprimirArquivo("src/Textos/entradaTexto.txt");
+        System.out.println("=====SAIDA DO TEXTO CRIPTOGRAFADO=====");
+        imprimirArquivo("src/Textos/saidaCripto.txt");
+
+    }
+
+    public void executarDecripto(String entradaCripto, String saidaDecripto){ //ATIVIDADE DE DESCRIPTOGRAFAR
+        // O aluno deve desenvolver o código para realizar o processo.
+
+        CarregarArquivo(entradaCripto); // armazena no buffer primario
+
+        ArrayList<String> bufferCripto = new ArrayList<>();
+    
+        for (String linha : bufferPrimario) {
+            StringBuilder novaLinha = new StringBuilder();
+    
+            novaLinha.append(cifra.descriptografar(linha));
+    
+            bufferCripto.add(novaLinha.toString());
+        }
+    
+        // escreve no arquivo saidadecripto.txt
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(saidaDecripto))) {
+            for (String linha : bufferCripto) {
+                writer.write(linha);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao escrever no arquivo: " + e.getMessage());
         }
 
-        System.out.println(bufferPrimario);
-    }
 
-        public void executarDecripto(String entradaCripto, String saidaDecripto){
-        // O aluno deve desenvolver o código para realizar o processo.
-    }
-
+        System.out.println("=====SAIDE DE TEXTO DESCRIPTOGRAFADO=====");
+        imprimirArquivo("src/Textos/saidaDecripto.txt");
+    
+    }   
 }
